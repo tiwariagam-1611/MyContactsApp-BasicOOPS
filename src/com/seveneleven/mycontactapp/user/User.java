@@ -4,9 +4,9 @@ public class User {
 
     public enum Plan { FREE, PREMIUM }
 
-    private String name;        // display name
+    private String name;       
     private String email;      
-    private String password;  
+    private String password;    
     private String pin;         // 6-digit PIN for OAuth-like login
     private Plan plan;
     private UserProfile profile; // optional
@@ -28,6 +28,24 @@ public class User {
     public UserProfile getProfile() { return profile; }
 
     public void setProfile(UserProfile profile) { this.profile = profile; }
+
+    public void setName(String newName) {
+        if (newName == null || newName.isBlank())
+            throw new IllegalArgumentException("Display name required");
+        this.name = newName.trim();
+    }
+
+    public void setEmail(String newEmail) {
+        if (newEmail == null || newEmail.isBlank())
+            throw new IllegalArgumentException("Email required");
+        this.email = newEmail.trim().toLowerCase();
+    }
+
+    public void setPassword(String newPassword) {
+        if (newPassword == null || newPassword.isBlank())
+            throw new IllegalArgumentException("Password required");
+        this.password = newPassword;
+    }
 
     public String perks() { return "Basic usage"; }
 

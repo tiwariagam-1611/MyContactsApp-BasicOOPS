@@ -7,9 +7,6 @@ public interface PasswordHasher {
     String hash(String rawPassword);
     boolean matches(String rawPassword, String storedHash);
 
-    /**
-     * Simple SHA-256 hasher Suitable for demos only.
-     */
     final class SimpleSha256PasswordHasher implements PasswordHasher {
 
         @Override

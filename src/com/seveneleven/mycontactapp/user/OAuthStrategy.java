@@ -1,9 +1,5 @@
 package com.seveneleven.mycontactapp.user;
 
-/**
- * "OAuth-like" demo: display name + PIN
- * Works for any plan (FREE or PREMIUM).
- */
 public class OAuthStrategy implements AuthenticationStrategy {
 
     private final UserRepository repo;

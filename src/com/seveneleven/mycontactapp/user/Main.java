@@ -6,47 +6,87 @@ public class Main {
 
     public static void main(String[] args) {
 
-        // --- Infrastructure / Data store ---
+        // Infrastructure
         UserRepository repo = new UserRepository();
 
-        // --- Services ---
+        // Services
         RegistrationService registration = new RegistrationService(repo);
         AuthenticationStrategy basicAuth = new BasicAuthStrategy(repo); // email + password
-        AuthenticationStrategy oauthAuth = new OAuthStrategy(repo);     // display name + PIN
+        AuthenticationStrategy oauthAuth  = new OAuthStrategy(repo);    // display name + PIN
+        ProfileService profileService     = new ProfileService();       // UC-03
 
-        // --- Session ---
+        // Session
         User currentUser = null;
 
         try (Scanner sc = new Scanner(System.in)) {
             boolean running = true;
-            System.out.println("=== MyContacts (Strategy Auth) ===");
+            System.out.println("=== MyContacts (Strategy Auth + UC-03) ===");
 
             while (running) {
                 System.out.println();
 
                 if (currentUser != null) {
-                    // -------- Logged-in menu --------
+                    // Logged-in menu (UC-03 focused)
                     System.out.println("Logged in: " + currentUser.getName()
                             + " <" + currentUser.getEmail() + "> [" + currentUser.getPlan() + "]");
                     System.out.println("Perks: " + currentUser.perks());
-                    System.out.println("1) Logout");
-                    System.out.println("2) Exit");
+
+                    System.out.println("1) Change Display Name");
+                    System.out.println("2) Change Email");
+                    System.out.println("3) Change Password");
+                    System.out.println("4) Logout");
+                    System.out.println("5) Exit");
                     System.out.print("> ");
                     String choice = readTrim(sc);
 
                     switch (choice) {
                         case "1" -> {
+                            System.out.print("New Display Name: ");
+                            String newName = readTrim(sc);
+                            try {
+                                profileService.changeDisplayName(currentUser, newName);
+                                System.out.println("Display name updated to: " + currentUser.getName());
+                            } catch (Exception ex) {
+                                System.out.println("Update failed: " + ex.getMessage());
+                            }
+                        }
+
+                        case "2" -> {
+                            System.out.print("New Email: ");
+                            String newEmail = readTrim(sc);
+                            try {
+                                profileService.changeEmail(currentUser, newEmail, repo);
+                                System.out.println("Email updated to: " + currentUser.getEmail());
+                            } catch (Exception ex) {
+                                System.out.println("Update failed: " + ex.getMessage());
+                            }
+                        }
+
+                        case "3" -> {
+                            System.out.println("\n-- Change Password --");
+                            System.out.print("Current Password: ");
+                            String oldPw = readTrim(sc);
+                            System.out.print("New Password    : ");
+                            String newPw = readTrim(sc);
+
+                            boolean ok = profileService.changePassword(currentUser, oldPw, newPw);
+                            System.out.println(ok ? "Password changed." : "Password change failed (check current password).");
+                        }
+
+                        case "4" -> {
                             currentUser = null;
                             System.out.println("Logged out.");
                         }
-                        case "2" -> {
+
+                        case "5" -> {
                             running = false;
                             System.out.println("Bye!");
                         }
+
                         default -> System.out.println("Invalid choice.");
                     }
                 } else {
-                    // -------- Logged-out menu --------
+                    // Logged-out menu
                     System.out.println("1) Register");
                     System.out.println("2) Login (email + password)");
                     System.out.println("3) Login (display name + PIN)");
@@ -59,13 +99,11 @@ public class Main {
                         case "1" -> handleRegistration(sc, registration);
 
                         case "2" -> {
-                            // --- BasicAuth ---
                             System.out.println("\n-- Login: email + password --");
                             System.out.print("Email: ");
                             String email = readTrim(sc);
                             System.out.print("Password: ");
                             String password = readTrim(sc);
-
                             User u = basicAuth.authenticate(email, password);
                             if (u != null) {
                                 currentUser = u;
@@ -77,13 +115,11 @@ public class Main {
                         }
 
                         case "3" -> {
-                            // --- OAuth-like (Name + PIN) ---
                             System.out.println("\n-- Login: display name + PIN --");
                             System.out.print("Display Name: ");
                             String name = readTrim(sc);
                             System.out.print("PIN: ");
                             String pin = readTrim(sc);
-
                             User u = oauthAuth.authenticate(name, pin);
                             if (u != null) {
                                 currentUser = u;
