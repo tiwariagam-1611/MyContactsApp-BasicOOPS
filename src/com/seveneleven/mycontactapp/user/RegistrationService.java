@@ -1,43 +1,38 @@
 package com.seveneleven.mycontactapp.user;
 
+import java.security.SecureRandom;
+
 public class RegistrationService {
     private final UserRepository repo;
+    private final SecureRandom rnd = new SecureRandom();
 
     public RegistrationService(UserRepository repo) {
-        if (repo == null) throw new IllegalArgumentException("repo required");
         this.repo = repo;
     }
 
-    public User register(String name,
-                         String email,
-                         String password,
-                         User.Plan plan,
-                         UserProfile profile) {
+    public User register(String name, String email, String password, User.Plan plan, UserProfile profile) {
+        // Minimal validations
+        if (name == null || name.isBlank()) throw new IllegalArgumentException("Name required");
+        if (email == null || email.isBlank()) throw new IllegalArgumentException("Email required");
+        if (password == null || password.isBlank()) throw new IllegalArgumentException("Password required");
+        if (plan == null) throw new IllegalArgumentException("Plan required");
 
-        // Basic validations (service-level safety)
-        if (name == null || name.trim().isEmpty())         throw new IllegalArgumentException("Name required");
-        if (password == null || password.trim().isEmpty()) throw new IllegalArgumentException("Password required");
-        if (plan == null)                                  throw new IllegalArgumentException("Plan required");
-        EmailValidator.validate(email);
+        email = email.trim().toLowerCase();
+        if (repo.existsByEmail(email)) throw new IllegalArgumentException("Email already registered");
 
-        // Premium-specific rule: phone required
-        if (plan == User.Plan.PREMIUM) {
-            String phone = (profile == null) ? null : profile.getPhone();
-            if (phone == null || phone.trim().isEmpty()) {
-                throw new IllegalArgumentException("Phone required for PREMIUM plan");
-            }
-        }
+        String pin = generatePin6(); // PIN generated here
 
-        String normalizedEmail = email.trim().toLowerCase();
-        if (repo.existsByEmail(normalizedEmail))
-            throw new IllegalArgumentException("Email already registered");
-
-        // Construct per plan (basic OOP)
         User user = (plan == User.Plan.FREE)
-                ? new FreeUser(name, normalizedEmail, password, profile)
-                : new PremiumUser(name, normalizedEmail, password, profile);
+                ? new FreeUser(name.trim(), email, password, pin, profile)
+                : new PremiumUser(name.trim(), email, password, pin, profile);
 
         repo.save(user);
         return user;
+    }
+
+    // --- PIN generation
+    private String generatePin6() {
+        int n = rnd.nextInt(1_000_000);
+        return String.format("%06d", n);
     }
 }

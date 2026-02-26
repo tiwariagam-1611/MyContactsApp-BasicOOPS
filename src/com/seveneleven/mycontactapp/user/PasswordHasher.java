@@ -8,7 +8,7 @@ public interface PasswordHasher {
     boolean matches(String rawPassword, String storedHash);
 
     /**
-     * Simple SHA-256 hasher (no salt). Suitable for demos only.
+     * Simple SHA-256 hasher Suitable for demos only.
      */
     final class SimpleSha256PasswordHasher implements PasswordHasher {
 
