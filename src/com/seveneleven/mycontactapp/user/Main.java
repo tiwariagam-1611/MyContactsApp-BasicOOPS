@@ -1,3 +1,8 @@
+// Use Case-5: View Contact Details
+// The user can access and review all stored information for a selected contact
+// @author Developer
+// @version 5.0
+
 package com.seveneleven.mycontactapp.user;
 
 import java.util.List;
