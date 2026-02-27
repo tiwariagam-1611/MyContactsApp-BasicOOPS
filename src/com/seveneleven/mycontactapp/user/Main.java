@@ -1,3 +1,10 @@
+// Use Case-1: User Registration
+// The user signs up by providing an email, password, and basic profile details
+// All input fields are checked for validity
+// If registration succeeds, the system displays the user's information
+// @author Developer
+// @version 1.0
+
 package com.seveneleven.mycontactapp.user;
 
 
