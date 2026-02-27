@@ -38,6 +38,23 @@ public class ContactService {
 
 		throw new IllegalArgumentException("Contact not found");
 	}
+	public void deleteContactByName(String name) {
+
+	    if (name == null || name.isBlank()) {
+	        throw new IllegalArgumentException("Contact name required");
+	    }
+
+	    for (Contact c : repo.findAll()) {
+
+	        if (c.getDisplayName().equalsIgnoreCase(name.trim())) {
+
+	            repo.deleteById(c.getId());
+	            return;
+	        }
+	    }
+
+	    throw new IllegalArgumentException("Contact not found");
+	}
 
 
 	public Contact editContactByName(String name, String newPhone, String newEmail) {

@@ -29,4 +29,12 @@ public class ContactRepository {
 
         contacts.put(contact.getId(), contact);
     }
+    public void deleteById(String id) {
+
+        if (!contacts.containsKey(id)) {
+            throw new IllegalArgumentException("Contact not found");
+        }
+
+        contacts.remove(id);
+    }
 }

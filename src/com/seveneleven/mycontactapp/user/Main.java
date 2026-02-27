@@ -1,7 +1,8 @@
-// Use Case-6: Edit Contact
-// The user updates the details of an existing contact, applying changes with proper validation
+// Use Case-7: Delete Contact
+// The user deletes a selected contact from their list after a confirmation prompt
+
 // @author Developer
-// @version 6.0
+// @version 7.0
 
 
 package com.seveneleven.mycontactapp.user;
@@ -48,8 +49,9 @@ public class Main {
                     System.out.println("6) List All Contacts");
                     System.out.println("7) View Contact by Name");
                     System.out.println("8) Edit Contact");
-                    System.out.println("9) Logout");
-                    System.out.println("10) Exit");
+                    System.out.println("9) Delete Contact");
+                    System.out.println("10) Logout");
+                    System.out.println("11) Exit");
                     System.out.print("> ");
                     String choice = readTrim(sc);
 
@@ -190,13 +192,37 @@ public class Main {
                                 System.out.println("Edit failed: " + ex.getMessage());
                             }
                         }
-
                         case "9" -> {
+                            System.out.println("\n-- Delete Contact --");
+                            System.out.print("Enter Contact Name: ");
+                            String name = readTrim(sc);
+
+                            try {
+                                Contact c = contactService.viewContactByName(name);
+
+                                System.out.println("Are you sure you want to delete:");
+                                System.out.println(c);
+                                System.out.print("Type YES to confirm: ");
+                                String confirm = readTrim(sc);
+
+                                if (confirm.equalsIgnoreCase("YES")) {
+                                    contactService.deleteContactByName(name);
+                                    System.out.println("Contact deleted successfully.");
+                                } else {
+                                    System.out.println("Delete cancelled.");
+                                }
+
+                            } catch (Exception ex) {
+                                System.out.println("Delete failed: " + ex.getMessage());
+                            }
+                        }
+
+                        case "10" -> {
                             currentUser = null;
                             System.out.println("Logged out.");
                         }
 
-                        case "10" -> {
+                        case "11" -> {
                             running = false;
                             System.out.println("Bye!");
                         }
