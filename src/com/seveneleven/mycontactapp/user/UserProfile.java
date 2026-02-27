@@ -1,9 +1,10 @@
+// UserProfile.java
 package com.seveneleven.mycontactapp.user;
 
 public class UserProfile {
-    private String firstName;  // optional
-    private String lastName;   // optional
-    private String phone;      // optional
+    private String firstName;
+    private String lastName;
+    private String phone;
 
     public UserProfile(String firstName, String lastName, String phone) {
         this.firstName = trimOrNull(firstName);

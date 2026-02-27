@@ -1,5 +1,6 @@
 package com.seveneleven.mycontactapp.user;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -7,26 +8,28 @@ public class Main {
     public static void main(String[] args) {
 
         // Infrastructure
-        UserRepository repo = new UserRepository();
+        UserRepository userRepo = new UserRepository();
+        ContactRepository contactRepo = new ContactRepository();
 
         // Services
-        RegistrationService registration = new RegistrationService(repo);
-        AuthenticationStrategy basicAuth = new BasicAuthStrategy(repo); // email + password
-        AuthenticationStrategy oauthAuth  = new OAuthStrategy(repo);    // display name + PIN
-        ProfileService profileService     = new ProfileService();       // UC-03
+        RegistrationService registration = new RegistrationService(userRepo);
+        AuthenticationStrategy basicAuth = new BasicAuthStrategy(userRepo);
+        AuthenticationStrategy oauthAuth  = new OAuthStrategy(userRepo);
+        ProfileService profileService     = new ProfileService();
+        ContactService contactService     = new ContactService(contactRepo);
 
         // Session
         User currentUser = null;
 
         try (Scanner sc = new Scanner(System.in)) {
             boolean running = true;
-            System.out.println("=== MyContacts (Strategy Auth + UC-03) ===");
+            System.out.println("=== MyContacts (Simplified UC1-UC4) ===");
 
             while (running) {
                 System.out.println();
 
                 if (currentUser != null) {
-                    // Logged-in menu (UC-03 focused)
+                    // Logged-in menu
                     System.out.println("Logged in: " + currentUser.getName()
                             + " <" + currentUser.getEmail() + "> [" + currentUser.getPlan() + "]");
                     System.out.println("Perks: " + currentUser.perks());
@@ -34,8 +37,11 @@ public class Main {
                     System.out.println("1) Change Display Name");
                     System.out.println("2) Change Email");
                     System.out.println("3) Change Password");
-                    System.out.println("4) Logout");
-                    System.out.println("5) Exit");
+                    System.out.println("4) Create Person Contact");
+                    System.out.println("5) Create Organization Contact");
+                    System.out.println("6) List All Contacts");
+                    System.out.println("7) Logout");
+                    System.out.println("8) Exit");
                     System.out.print("> ");
                     String choice = readTrim(sc);
 
@@ -55,7 +61,7 @@ public class Main {
                             System.out.print("New Email: ");
                             String newEmail = readTrim(sc);
                             try {
-                                profileService.changeEmail(currentUser, newEmail, repo);
+                                profileService.changeEmail(currentUser, newEmail, userRepo);
                                 System.out.println("Email updated to: " + currentUser.getEmail());
                             } catch (Exception ex) {
                                 System.out.println("Update failed: " + ex.getMessage());
@@ -70,15 +76,63 @@ public class Main {
                             String newPw = readTrim(sc);
 
                             boolean ok = profileService.changePassword(currentUser, oldPw, newPw);
-                            System.out.println(ok ? "Password changed." : "Password change failed (check current password).");
+                            System.out.println(ok ? "Password changed." : "Password change failed.");
                         }
 
                         case "4" -> {
+                            System.out.println("\n-- Create Person Contact --");
+                            System.out.print("Name : ");
+                            String name = readTrim(sc);
+                            System.out.print("Phone: ");
+                            String phone = readTrim(sc);
+                            System.out.print("Email: ");
+                            String email = readTrim(sc);
+
+                            try {
+                                Contact c = contactService.createPerson(name, phone, email);
+                                System.out.println("Created: " + c);
+                                System.out.println("Total contacts: " + contactRepo.count());
+                            } catch (Exception ex) {
+                                System.out.println("Create failed: " + ex.getMessage());
+                            }
+                        }
+
+                        case "5" -> {
+                            System.out.println("\n-- Create Organization Contact --");
+                            System.out.print("Organization Name: ");
+                            String name = readTrim(sc);
+                            System.out.print("Phone           : ");
+                            String phone = readTrim(sc);
+                            System.out.print("Email           : ");
+                            String email = readTrim(sc);
+
+                            try {
+                                Contact c = contactService.createOrganization(name, phone, email);
+                                System.out.println("Created: " + c);
+                                System.out.println("Total contacts: " + contactRepo.count());
+                            } catch (Exception ex) {
+                                System.out.println("Create failed: " + ex.getMessage());
+                            }
+                        }
+
+                        case "6" -> {
+                            System.out.println("\n-- All Contacts --");
+                            List<Contact> list = contactRepo.findAll();
+                            if (list.isEmpty()) {
+                                System.out.println("(no contacts yet)");
+                            } else {
+                                for (Contact c : list) {
+                                    System.out.println("- " + c);
+                                }
+                            }
+                        }
+
+                        case "7" -> {
                             currentUser = null;
                             System.out.println("Logged out.");
                         }
 
-                        case "5" -> {
+                        case "8" -> {
                             running = false;
                             System.out.println("Bye!");
                         }
@@ -90,8 +144,7 @@ public class Main {
                     System.out.println("1) Register");
                     System.out.println("2) Login (email + password)");
                     System.out.println("3) Login (display name + PIN)");
-                    System.out.println("4) Who am I");
-                    System.out.println("5) Exit");
+                    System.out.println("4) Exit");
                     System.out.print("> ");
                     String choice = readTrim(sc);
 
@@ -108,7 +161,6 @@ public class Main {
                             if (u != null) {
                                 currentUser = u;
                                 System.out.println("Logged in (Basic Auth).");
-                                System.out.println("Perks: " + currentUser.perks());
                             } else {
                                 System.out.println("Login failed.");
                             }
@@ -124,17 +176,12 @@ public class Main {
                             if (u != null) {
                                 currentUser = u;
                                 System.out.println("Logged in (Name + PIN).");
-                                System.out.println("Perks: " + currentUser.perks());
                             } else {
                                 System.out.println("Login failed.");
                             }
                         }
 
                         case "4" -> {
-                            System.out.println("No user is currently logged in.");
-                        }
-
-                        case "5" -> {
                             running = false;
                             System.out.println("Bye!");
                         }
