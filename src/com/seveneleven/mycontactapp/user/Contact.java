@@ -37,7 +37,7 @@ public abstract class Contact {
     public void setPhone(String phone) { this.phone = (phone == null || phone.isBlank()) ? null : phone.trim(); }
     public void setEmail(String email) { this.email = (email == null || email.isBlank()) ? null : email.trim().toLowerCase(); }
 
-    // Subclasses define their type
+
     public abstract Type getType();
 
     @Override

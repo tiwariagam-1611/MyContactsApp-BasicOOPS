@@ -7,7 +7,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        // Infrastructure
+        //Data Storage Infrastructure
         UserRepository userRepo = new UserRepository();
         ContactRepository contactRepo = new ContactRepository();
 
@@ -23,13 +23,13 @@ public class Main {
 
         try (Scanner sc = new Scanner(System.in)) {
             boolean running = true;
-            System.out.println("=== MyContacts (Simplified UC1-UC4) ===");
+            System.out.println("=== MyContacts (UC1-UC5) ===");
 
             while (running) {
                 System.out.println();
 
                 if (currentUser != null) {
-                    // Logged-in menu
+
                     System.out.println("Logged in: " + currentUser.getName()
                             + " <" + currentUser.getEmail() + "> [" + currentUser.getPlan() + "]");
                     System.out.println("Perks: " + currentUser.perks());
@@ -40,12 +40,14 @@ public class Main {
                     System.out.println("4) Create Person Contact");
                     System.out.println("5) Create Organization Contact");
                     System.out.println("6) List All Contacts");
-                    System.out.println("7) Logout");
-                    System.out.println("8) Exit");
+                    System.out.println("7) View Contact by Name");
+                    System.out.println("8) Logout");
+                    System.out.println("9) Exit");
                     System.out.print("> ");
                     String choice = readTrim(sc);
 
                     switch (choice) {
+
                         case "1" -> {
                             System.out.print("New Display Name: ");
                             String newName = readTrim(sc);
@@ -128,19 +130,43 @@ public class Main {
                         }
 
                         case "7" -> {
+                            System.out.println("\n-- View Contact Details --");
+                            System.out.print("Enter Contact Name: ");
+                            String name = readTrim(sc);
+
+                            try {
+                                Contact c = contactService.viewContactByName(name);
+
+                                System.out.println("\n===== CONTACT DETAILS =====");
+                                System.out.println("Type    : " + c.getType());
+                                System.out.println("Name    : " + c.getDisplayName());
+                                System.out.println("Email   : " + 
+                                        (c.getEmail() == null ? "-" : c.getEmail()));
+                                System.out.println("Phone   : " + 
+                                        (c.getPhone() == null ? "-" : c.getPhone()));
+                                System.out.println("Created : " + c.getCreatedAt());
+                                System.out.println("============================");
+
+                            } catch (Exception ex) {
+                                System.out.println("Error: " + ex.getMessage());
+                            }
+                        }
+
+                        case "8" -> {
                             currentUser = null;
                             System.out.println("Logged out.");
                         }
 
-                        case "8" -> {
+                        case "9" -> {
                             running = false;
                             System.out.println("Bye!");
                         }
 
                         default -> System.out.println("Invalid choice.");
                     }
+
                 } else {
-                    // Logged-out menu
+
                     System.out.println("1) Register");
                     System.out.println("2) Login (email + password)");
                     System.out.println("3) Login (display name + PIN)");
@@ -149,6 +175,7 @@ public class Main {
                     String choice = readTrim(sc);
 
                     switch (choice) {
+
                         case "1" -> handleRegistration(sc, registration);
 
                         case "2" -> {
