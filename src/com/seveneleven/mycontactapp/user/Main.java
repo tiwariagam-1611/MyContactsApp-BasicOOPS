@@ -1,8 +1,7 @@
-// Use Case-8: Bulk Operations
-// The user performs actions on multiple contacts at once, including delete, tagging
-// with proper validation and uniform handling of individual and grouped items.
+// Use Case-09: Search Contacts
+// The user searches for contacts using flexible criteria such as name, phone number, email, or tags.
 // @author Developer
-// @version 8.0 UC-08: Bulk Operations
+// @version 9.0 UC-09: Search Contacts
 
 package com.seveneleven.mycontactapp.user;
 
@@ -25,6 +24,7 @@ public class Main {
         User currentUser = null;
 
         try (Scanner sc = new Scanner(System.in)) {
+
             boolean running = true;
             System.out.println("=== MyContacts ===");
 
@@ -45,9 +45,11 @@ public class Main {
                     System.out.println("6) View Contact by Name");
                     System.out.println("7) Edit Contact");
                     System.out.println("8) Delete Contact");
-                    System.out.println("9) Logout");
-                    System.out.println("10) Exit");
+                    System.out.println("9) Search Contacts");
+                    System.out.println("10) Logout");
+                    System.out.println("11) Exit");
                     System.out.print("> ");
+
                     String choice = readTrim(sc);
 
                     switch (choice) {
@@ -79,7 +81,6 @@ public class Main {
                             String oldPw = readTrim(sc);
                             System.out.print("New Password: ");
                             String newPw = readTrim(sc);
-
                             boolean ok = profileService.changePassword(currentUser, oldPw, newPw);
                             System.out.println(ok ? "Password changed." : "Password change failed.");
                         }
@@ -87,13 +88,10 @@ public class Main {
                         case "4" -> {
                             System.out.print("Name: ");
                             String name = readTrim(sc);
-
                             System.out.print("Phone: ");
                             String phone = readTrim(sc);
-
                             System.out.print("Email: ");
                             String email = readTrim(sc);
-
                             System.out.print("Tag (PERSON/ORG): ");
                             String tag = readTrim(sc);
 
@@ -119,7 +117,6 @@ public class Main {
                         case "6" -> {
                             System.out.print("Enter Contact Name: ");
                             String name = readTrim(sc);
-
                             try {
                                 Contact c = contactService.viewContactByName(name);
                                 System.out.println("Tag   : " + c.getTag());
@@ -198,11 +195,55 @@ public class Main {
                         }
 
                         case "9" -> {
+
+                            System.out.println("Search By:");
+                            System.out.println("1) Name");
+                            System.out.println("2) Phone");
+                            System.out.println("3) Email");
+                            System.out.println("4) Tag");
+                            System.out.print("> ");
+
+                            String option = readTrim(sc);
+                            String type = null;
+
+                            switch (option) {
+                                case "1": type = "name"; break;
+                                case "2": type = "phone"; break;
+                                case "3": type = "email"; break;
+                                case "4": type = "tag"; break;
+                                default:
+                                    System.out.println("Invalid choice");
+                            }
+
+                            if (type != null) {
+
+                                System.out.print("Enter search value: ");
+                                String value = readTrim(sc);
+
+                                try {
+                                    List<Contact> results =
+                                            contactService.searchContacts(type, value);
+
+                                    if (results.isEmpty()) {
+                                        System.out.println("No contacts found.");
+                                    } else {
+                                        for (Contact c : results) {
+                                            System.out.println("- " + c);
+                                        }
+                                    }
+
+                                } catch (Exception ex) {
+                                    System.out.println("Search failed: " + ex.getMessage());
+                                }
+                            }
+                        }
+
+                        case "10" -> {
                             currentUser = null;
                             System.out.println("Logged out.");
                         }
 
-                        case "10" -> {
+                        case "11" -> {
                             running = false;
                             System.out.println("Bye!");
                         }
@@ -217,6 +258,7 @@ public class Main {
                     System.out.println("3) Login (display name + PIN)");
                     System.out.println("4) Exit");
                     System.out.print("> ");
+
                     String choice = readTrim(sc);
 
                     switch (choice) {

@@ -35,11 +35,15 @@ public class ContactService {
     }
 
     public Contact viewContactByName(String name) {
-        return repo.findAll()
-                .stream()
-                .filter(c -> c.getDisplayName().equalsIgnoreCase(name))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Contact not found"));
+
+        for (Contact contact : repo.findAll()) {
+
+            if (contact.getDisplayName().equalsIgnoreCase(name)) {
+                return contact;
+            }
+        }
+
+        throw new RuntimeException("Contact not found");
     }
 
     public Contact editContactByName(String name, String newPhone, String newEmail) {
@@ -62,5 +66,27 @@ public class ContactService {
 
         Contact contact = viewContactByName(name);
         repo.deleteById(contact.getId());
+    }
+
+    // UC-09 SEARCH IMPLEMENTATION
+
+    public List<Contact> searchContacts(String type, String value) {
+
+        List<Contact> allContacts = repo.findAll();
+        SearchCriteria operation;
+
+        if (type.equalsIgnoreCase("name")) {
+            operation = new NameSearchCriteria();
+        } else if (type.equalsIgnoreCase("phone")) {
+            operation = new PhoneSearchCriteria();
+        } else if (type.equalsIgnoreCase("email")) {
+            operation = new EmailSearchCriteria();
+        } else if (type.equalsIgnoreCase("tag")) {
+            operation = new TagSearchCriteria();
+        } else {
+            throw new IllegalArgumentException("Invalid search type");
+        }
+
+        return operation.search(allContacts, value);
     }
 }
