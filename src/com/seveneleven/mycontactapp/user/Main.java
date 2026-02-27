@@ -1,3 +1,10 @@
+// Use Case-2: User Authentication
+// The user accesses their account
+// The password is securely hashed using MessageDigest with SHA-256
+// The user may choose to authenticate via BasicAuth or OAuth methods
+// @author Developer
+// @version 2.0
+
 package com.seveneleven.mycontactapp.user;
 
 import java.util.Scanner;
