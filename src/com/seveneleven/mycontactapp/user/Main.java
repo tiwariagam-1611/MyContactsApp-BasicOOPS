@@ -1,3 +1,9 @@
+// Use Case-3: User Profile Management
+// The user modifies their profile details, updates their password, or adjusts personal preferences
+// Editable fields include email, and account password
+// @author Developer
+// @version 3.0
+
 package com.seveneleven.mycontactapp.user;
 
 import java.util.Scanner;
