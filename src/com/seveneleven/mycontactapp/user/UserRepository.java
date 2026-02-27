@@ -31,8 +31,8 @@ public class UserRepository {
 
     public void updateEmail(User user, String newEmail) {
         if (user == null) throw new IllegalArgumentException("User required");
-        String oldKey = user.getEmail();          // already normalized
-        String newKey = normalize(newEmail);      // target normalized
+        String oldKey = user.getEmail(); 
+        String newKey = normalize(newEmail); 
 
         if (oldKey == null) throw new IllegalStateException("User email missing");
         if (newKey == null || newKey.isBlank()) throw new IllegalArgumentException("New email required");
@@ -44,7 +44,7 @@ public class UserRepository {
 
 
         usersByEmail.remove(oldKey);
-        user.setEmail(newKey);    // update entity
+        user.setEmail(newKey);
         usersByEmail.put(newKey, user);
     }
 

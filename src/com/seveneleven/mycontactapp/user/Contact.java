@@ -5,46 +5,79 @@ import java.util.UUID;
 
 public abstract class Contact {
 
-    public enum Type { PERSON, ORGANIZATION }
-
     private final String id;
     private final LocalDateTime createdAt;
+
     private String displayName;
     private String phone;
     private String email;
 
-    protected Contact(String displayName, String phone, String email) {
-        if (displayName == null || displayName.isBlank()) throw new IllegalArgumentException("Contact name required");
+    public Contact(String displayName, String phone, String email) {
+
+        if (displayName == null || displayName.isBlank()) {
+            throw new IllegalArgumentException("Name required");
+        }
 
         this.id = UUID.randomUUID().toString();
-        this.displayName = displayName.trim();
-        this.phone = (phone == null || phone.isBlank()) ? null : phone.trim();
-        this.email = (email == null || email.isBlank()) ? null : email.trim().toLowerCase();
         this.createdAt = LocalDateTime.now();
+        this.displayName = displayName.trim();
+        setPhone(phone);
+        setEmail(email);
     }
 
-    public String getId() { return id; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public String getDisplayName() { return displayName; }
-    public String getPhone() { return phone; }
-    public String getEmail() { return email; }
 
-    public void setDisplayName(String newName) {
-        if (newName == null || newName.isBlank()) throw new IllegalArgumentException("Contact name required");
-        this.displayName = newName.trim();
+    protected Contact(Contact other) {
+        this.id = other.id;
+        this.createdAt = other.createdAt;
+        this.displayName = other.displayName;
+        this.phone = other.phone;
+        this.email = other.email;
     }
 
-    public void setPhone(String phone) { this.phone = (phone == null || phone.isBlank()) ? null : phone.trim(); }
-    public void setEmail(String email) { this.email = (email == null || email.isBlank()) ? null : email.trim().toLowerCase(); }
+    public abstract String getType();
 
+    public String getDisplayName() {
+        return displayName;
+    }
 
-    public abstract Type getType();
+    public void setDisplayName(String displayName) {
+        if (displayName == null || displayName.isBlank()) {
+            throw new IllegalArgumentException("Name required");
+        }
+        this.displayName = displayName.trim();
+    }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        if (phone != null && phone.length() < 5) {
+            throw new IllegalArgumentException("Invalid phone");
+        }
+        this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+    public String getId() {
+        return id;
+    }
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setEmail(String email) {
+        if (email != null && !email.contains("@")) {
+            throw new IllegalArgumentException("Invalid email");
+        }
+        this.email = email;
+    }
     @Override
     public String toString() {
-        return "[" + getType() + "] " + displayName +
-               " (id=" + id + ", email=" + (email == null ? "-" : email) +
-               ", phone=" + (phone == null ? "-" : phone) +
-               ", created=" + createdAt + ")";
+        return getType() + " | Name: " + displayName +
+               " | Phone: " + (phone == null ? "-" : phone) +
+               " | Email: " + (email == null ? "-" : email);
     }
 }

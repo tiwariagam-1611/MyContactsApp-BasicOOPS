@@ -1,3 +1,9 @@
+// Use Case-6: Edit Contact
+// The user updates the details of an existing contact, applying changes with proper validation
+// @author Developer
+// @version 6.0
+
+
 package com.seveneleven.mycontactapp.user;
 
 import java.util.List;
@@ -7,23 +13,23 @@ public class Main {
 
     public static void main(String[] args) {
 
-        //Data Storage Infrastructure
+        // Data Storage Infrastructure
         UserRepository userRepo = new UserRepository();
         ContactRepository contactRepo = new ContactRepository();
 
         // Services
         RegistrationService registration = new RegistrationService(userRepo);
         AuthenticationStrategy basicAuth = new BasicAuthStrategy(userRepo);
-        AuthenticationStrategy oauthAuth  = new OAuthStrategy(userRepo);
-        ProfileService profileService     = new ProfileService();
-        ContactService contactService     = new ContactService(contactRepo);
+        AuthenticationStrategy oauthAuth = new OAuthStrategy(userRepo);
+        ProfileService profileService = new ProfileService();
+        ContactService contactService = new ContactService(contactRepo);
 
         // Session
         User currentUser = null;
 
         try (Scanner sc = new Scanner(System.in)) {
             boolean running = true;
-            System.out.println("=== MyContacts (UC1-UC5) ===");
+            System.out.println("=== MyContacts (UC1-UC6) ===");
 
             while (running) {
                 System.out.println();
@@ -41,8 +47,9 @@ public class Main {
                     System.out.println("5) Create Organization Contact");
                     System.out.println("6) List All Contacts");
                     System.out.println("7) View Contact by Name");
-                    System.out.println("8) Logout");
-                    System.out.println("9) Exit");
+                    System.out.println("8) Edit Contact");
+                    System.out.println("9) Logout");
+                    System.out.println("10) Exit");
                     System.out.print("> ");
                     String choice = readTrim(sc);
 
@@ -153,11 +160,43 @@ public class Main {
                         }
 
                         case "8" -> {
+                            System.out.println("\n-- Edit Contact --");
+                            System.out.print("Enter Contact Name: ");
+                            String name = readTrim(sc);
+
+                            System.out.print("New Phone (leave blank to skip): ");
+                            String newPhone = readTrim(sc);
+
+                            System.out.print("New Email (leave blank to skip): ");
+                            String newEmail = readTrim(sc);
+
+                            try {
+                                Contact updated =
+                                        contactService.editContactByName(name, newPhone, newEmail);
+
+                                System.out.println("Contact updated successfully.");
+
+                                System.out.println("\n===== UPDATED DETAILS =====");
+                                System.out.println("Type    : " + updated.getType());
+                                System.out.println("Name    : " + updated.getDisplayName());
+                                System.out.println("Email   : " +
+                                        (updated.getEmail() == null ? "-" : updated.getEmail()));
+                                System.out.println("Phone   : " +
+                                        (updated.getPhone() == null ? "-" : updated.getPhone()));
+                                System.out.println("Created : " + updated.getCreatedAt());
+                                System.out.println("============================");
+
+                            } catch (Exception ex) {
+                                System.out.println("Edit failed: " + ex.getMessage());
+                            }
+                        }
+
+                        case "9" -> {
                             currentUser = null;
                             System.out.println("Logged out.");
                         }
 
-                        case "9" -> {
+                        case "10" -> {
                             running = false;
                             System.out.println("Bye!");
                         }

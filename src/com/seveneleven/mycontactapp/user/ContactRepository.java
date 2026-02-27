@@ -20,4 +20,13 @@ public class ContactRepository {
     public int count() {
         return contacts.size();
     }
+    
+    public void update(Contact contact) {
+
+        if (!contacts.containsKey(contact.getId())) {
+            throw new IllegalArgumentException("Contact not found");
+        }
+
+        contacts.put(contact.getId(), contact);
+    }
 }
