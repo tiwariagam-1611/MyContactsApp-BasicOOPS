@@ -4,92 +4,63 @@ import java.util.List;
 
 public class ContactService {
 
-	private final ContactRepository repo;
+    private final ContactRepository repo;
 
-	public ContactService(ContactRepository repo) {
-		this.repo = repo;
-	}
+    public ContactService(ContactRepository repo) {
+        this.repo = repo;
+    }
 
-	public Contact createPerson(String name, String phone, String email) {
-		Contact c = new PersonContact(name, phone, email);
-		repo.save(c);
-		return c;
-	}
+    public Contact createContact(String name, String phone, String email, String tag) {
 
-	public Contact createOrganization(String name, String phone, String email) {
-		Contact c = new OrganizationContact(name, phone, email);
-		repo.save(c);
-		return c;
-	}
+        if (tag == null || tag.isBlank()) {
+            throw new IllegalArgumentException("Tag required");
+        }
 
-	public Contact viewContactByName(String name) {
+        Contact contact;
 
-		if (name == null || name.isBlank()) {
-			throw new IllegalArgumentException("Contact name required");
-		}
+        if (tag.equalsIgnoreCase("PERSON")) {
+            contact = new PersonContact(name, phone, email);
+        } else if (tag.equalsIgnoreCase("ORG")) {
+            contact = new OrganizationContact(name, phone, email);
+        } else {
+            throw new IllegalArgumentException("Invalid tag");
+        }
 
-		List<Contact> contacts = repo.findAll();
+        repo.save(contact);
+        return contact;
+    }
 
-		for (Contact c : contacts) {
-			if (c.getDisplayName().equalsIgnoreCase(name.trim())) {
-				return c;
-			}
-		}
+    public List<Contact> getAllContacts() {
+        return repo.findAll();
+    }
 
-		throw new IllegalArgumentException("Contact not found");
-	}
-	public void deleteContactByName(String name) {
+    public Contact viewContactByName(String name) {
+        return repo.findAll()
+                .stream()
+                .filter(c -> c.getDisplayName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Contact not found"));
+    }
 
-	    if (name == null || name.isBlank()) {
-	        throw new IllegalArgumentException("Contact name required");
-	    }
+    public Contact editContactByName(String name, String newPhone, String newEmail) {
 
-	    for (Contact c : repo.findAll()) {
+        Contact contact = viewContactByName(name);
 
-	        if (c.getDisplayName().equalsIgnoreCase(name.trim())) {
+        if (newPhone != null && !newPhone.isBlank()) {
+            contact.setPhone(newPhone);
+        }
 
-	            repo.deleteById(c.getId());
-	            return;
-	        }
-	    }
+        if (newEmail != null && !newEmail.isBlank()) {
+            contact.setEmail(newEmail);
+        }
 
-	    throw new IllegalArgumentException("Contact not found");
-	}
+        repo.update(contact);
+        return contact;
+    }
 
+    public void deleteContactByName(String name) {
 
-	public Contact editContactByName(String name, String newPhone, String newEmail) {
-
-		if (name == null || name.isBlank()) {
-			throw new IllegalArgumentException("Contact name required");
-		}
-
-		for (Contact original : repo.findAll()) {
-
-			if (original.getDisplayName().equalsIgnoreCase(name.trim())) {
-
-				Contact copy;
-
-				if (original instanceof PersonContact) {
-					copy = new PersonContact((PersonContact) original);
-				} else {
-					copy = new OrganizationContact((OrganizationContact) original);
-				}
-
-				if (newPhone != null && !newPhone.isBlank()) {
-					copy.setPhone(newPhone);
-				}
-
-				if (newEmail != null && !newEmail.isBlank()) {
-					copy.setEmail(newEmail);
-				}
-
-				repo.update(copy);
-
-				return copy;
-			}
-		}
-
-
-		throw new IllegalArgumentException("Contact not found");
-	}
+        Contact contact = viewContactByName(name);
+        repo.deleteById(contact.getId());
+    }
 }

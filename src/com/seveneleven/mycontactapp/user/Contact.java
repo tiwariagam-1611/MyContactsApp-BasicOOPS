@@ -1,49 +1,50 @@
 package com.seveneleven.mycontactapp.user;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 public abstract class Contact {
 
     private final String id;
-    private final LocalDateTime createdAt;
-
     private String displayName;
     private String phone;
     private String email;
+    private String tag;
 
-    public Contact(String displayName, String phone, String email) {
+    public Contact(String displayName, String phone, String email, String tag) {
 
         if (displayName == null || displayName.isBlank()) {
-            throw new IllegalArgumentException("Name required");
+            throw new IllegalArgumentException("Display name required");
         }
 
         this.id = UUID.randomUUID().toString();
-        this.createdAt = LocalDateTime.now();
         this.displayName = displayName.trim();
-        setPhone(phone);
-        setEmail(email);
+        this.phone = phone;
+        this.email = email;
+        this.tag = tag;
     }
 
-
-    protected Contact(Contact other) {
+    public Contact(Contact other) {
         this.id = other.id;
-        this.createdAt = other.createdAt;
         this.displayName = other.displayName;
         this.phone = other.phone;
         this.email = other.email;
+        this.tag = other.tag;
     }
 
-    public abstract String getType();
+    public String getId() {
+        return id;
+    }
 
     public String getDisplayName() {
         return displayName;
     }
 
     public void setDisplayName(String displayName) {
+
         if (displayName == null || displayName.isBlank()) {
-            throw new IllegalArgumentException("Name required");
+            throw new IllegalArgumentException("Display name required");
         }
+
         this.displayName = displayName.trim();
     }
 
@@ -52,32 +53,52 @@ public abstract class Contact {
     }
 
     public void setPhone(String phone) {
-        if (phone != null && phone.length() < 5) {
-            throw new IllegalArgumentException("Invalid phone");
-        }
         this.phone = phone;
     }
 
     public String getEmail() {
         return email;
     }
-    public String getId() {
-        return id;
-    }
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
 
     public void setEmail(String email) {
-        if (email != null && !email.contains("@")) {
-            throw new IllegalArgumentException("Invalid email");
-        }
         this.email = email;
     }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+
+        if (tag == null || tag.isBlank()) {
+            throw new IllegalArgumentException("Tag required");
+        }
+
+        this.tag = tag;
+    }
+
+    public abstract Contact copy();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Contact)) return false;
+        Contact contact = (Contact) o;
+        return id.equals(contact.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
     @Override
     public String toString() {
-        return getType() + " | Name: " + displayName +
-               " | Phone: " + (phone == null ? "-" : phone) +
-               " | Email: " + (email == null ? "-" : email);
+        return "Contact{" +
+                "tag='" + tag + '\'' +
+                ", name='" + displayName + '\'' +
+                ", phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
+                '}';
     }
 }

@@ -1,9 +1,8 @@
-// Use Case-7: Delete Contact
-// The user deletes a selected contact from their list after a confirmation prompt
-
+// Use Case-8: Bulk Operations
+// The user performs actions on multiple contacts at once, including delete, tagging
+// with proper validation and uniform handling of individual and grouped items.
 // @author Developer
-// @version 7.0
-
+// @version 8.0 UC-08: Bulk Operations
 
 package com.seveneleven.mycontactapp.user;
 
@@ -14,23 +13,20 @@ public class Main {
 
     public static void main(String[] args) {
 
-        // Data Storage Infrastructure
         UserRepository userRepo = new UserRepository();
         ContactRepository contactRepo = new ContactRepository();
 
-        // Services
         RegistrationService registration = new RegistrationService(userRepo);
         AuthenticationStrategy basicAuth = new BasicAuthStrategy(userRepo);
         AuthenticationStrategy oauthAuth = new OAuthStrategy(userRepo);
         ProfileService profileService = new ProfileService();
         ContactService contactService = new ContactService(contactRepo);
 
-        // Session
         User currentUser = null;
 
         try (Scanner sc = new Scanner(System.in)) {
             boolean running = true;
-            System.out.println("=== MyContacts (UC1-UC6) ===");
+            System.out.println("=== MyContacts ===");
 
             while (running) {
                 System.out.println();
@@ -44,14 +40,13 @@ public class Main {
                     System.out.println("1) Change Display Name");
                     System.out.println("2) Change Email");
                     System.out.println("3) Change Password");
-                    System.out.println("4) Create Person Contact");
-                    System.out.println("5) Create Organization Contact");
-                    System.out.println("6) List All Contacts");
-                    System.out.println("7) View Contact by Name");
-                    System.out.println("8) Edit Contact");
-                    System.out.println("9) Delete Contact");
-                    System.out.println("10) Logout");
-                    System.out.println("11) Exit");
+                    System.out.println("4) Create Contact");
+                    System.out.println("5) List All Contacts");
+                    System.out.println("6) View Contact by Name");
+                    System.out.println("7) Edit Contact");
+                    System.out.println("8) Delete Contact");
+                    System.out.println("9) Logout");
+                    System.out.println("10) Exit");
                     System.out.print("> ");
                     String choice = readTrim(sc);
 
@@ -80,10 +75,9 @@ public class Main {
                         }
 
                         case "3" -> {
-                            System.out.println("\n-- Change Password --");
                             System.out.print("Current Password: ");
                             String oldPw = readTrim(sc);
-                            System.out.print("New Password    : ");
+                            System.out.print("New Password: ");
                             String newPw = readTrim(sc);
 
                             boolean ok = profileService.changePassword(currentUser, oldPw, newPw);
@@ -91,43 +85,27 @@ public class Main {
                         }
 
                         case "4" -> {
-                            System.out.println("\n-- Create Person Contact --");
-                            System.out.print("Name : ");
+                            System.out.print("Name: ");
                             String name = readTrim(sc);
+
                             System.out.print("Phone: ");
                             String phone = readTrim(sc);
+
                             System.out.print("Email: ");
                             String email = readTrim(sc);
 
+                            System.out.print("Tag (PERSON/ORG): ");
+                            String tag = readTrim(sc);
+
                             try {
-                                Contact c = contactService.createPerson(name, phone, email);
+                                Contact c = contactService.createContact(name, phone, email, tag);
                                 System.out.println("Created: " + c);
-                                System.out.println("Total contacts: " + contactRepo.count());
                             } catch (Exception ex) {
                                 System.out.println("Create failed: " + ex.getMessage());
                             }
                         }
 
                         case "5" -> {
-                            System.out.println("\n-- Create Organization Contact --");
-                            System.out.print("Organization Name: ");
-                            String name = readTrim(sc);
-                            System.out.print("Phone           : ");
-                            String phone = readTrim(sc);
-                            System.out.print("Email           : ");
-                            String email = readTrim(sc);
-
-                            try {
-                                Contact c = contactService.createOrganization(name, phone, email);
-                                System.out.println("Created: " + c);
-                                System.out.println("Total contacts: " + contactRepo.count());
-                            } catch (Exception ex) {
-                                System.out.println("Create failed: " + ex.getMessage());
-                            }
-                        }
-
-                        case "6" -> {
-                            System.out.println("\n-- All Contacts --");
                             List<Contact> list = contactRepo.findAll();
                             if (list.isEmpty()) {
                                 System.out.println("(no contacts yet)");
@@ -138,31 +116,22 @@ public class Main {
                             }
                         }
 
-                        case "7" -> {
-                            System.out.println("\n-- View Contact Details --");
+                        case "6" -> {
                             System.out.print("Enter Contact Name: ");
                             String name = readTrim(sc);
 
                             try {
                                 Contact c = contactService.viewContactByName(name);
-
-                                System.out.println("\n===== CONTACT DETAILS =====");
-                                System.out.println("Type    : " + c.getType());
-                                System.out.println("Name    : " + c.getDisplayName());
-                                System.out.println("Email   : " + 
-                                        (c.getEmail() == null ? "-" : c.getEmail()));
-                                System.out.println("Phone   : " + 
-                                        (c.getPhone() == null ? "-" : c.getPhone()));
-                                System.out.println("Created : " + c.getCreatedAt());
-                                System.out.println("============================");
-
+                                System.out.println("Tag   : " + c.getTag());
+                                System.out.println("Name  : " + c.getDisplayName());
+                                System.out.println("Email : " + (c.getEmail() == null ? "-" : c.getEmail()));
+                                System.out.println("Phone : " + (c.getPhone() == null ? "-" : c.getPhone()));
                             } catch (Exception ex) {
                                 System.out.println("Error: " + ex.getMessage());
                             }
                         }
 
-                        case "8" -> {
-                            System.out.println("\n-- Edit Contact --");
+                        case "7" -> {
                             System.out.print("Enter Contact Name: ");
                             String name = readTrim(sc);
 
@@ -172,57 +141,68 @@ public class Main {
                             System.out.print("New Email (leave blank to skip): ");
                             String newEmail = readTrim(sc);
 
+                            System.out.print("New Tag (leave blank to skip): ");
+                            String newTag = readTrim(sc);
+
                             try {
                                 Contact updated =
                                         contactService.editContactByName(name, newPhone, newEmail);
 
-                                System.out.println("Contact updated successfully.");
+                                if (!newTag.isBlank()) {
+                                    updated.setTag(newTag);
+                                    contactRepo.update(updated);
+                                }
 
-                                System.out.println("\n===== UPDATED DETAILS =====");
-                                System.out.println("Type    : " + updated.getType());
-                                System.out.println("Name    : " + updated.getDisplayName());
-                                System.out.println("Email   : " +
-                                        (updated.getEmail() == null ? "-" : updated.getEmail()));
-                                System.out.println("Phone   : " +
-                                        (updated.getPhone() == null ? "-" : updated.getPhone()));
-                                System.out.println("Created : " + updated.getCreatedAt());
-                                System.out.println("============================");
+                                System.out.println("Contact updated successfully.");
+                                System.out.println("Tag   : " + updated.getTag());
+                                System.out.println("Name  : " + updated.getDisplayName());
+                                System.out.println("Email : " + (updated.getEmail() == null ? "-" : updated.getEmail()));
+                                System.out.println("Phone : " + (updated.getPhone() == null ? "-" : updated.getPhone()));
 
                             } catch (Exception ex) {
                                 System.out.println("Edit failed: " + ex.getMessage());
                             }
                         }
-                        case "9" -> {
-                            System.out.println("\n-- Delete Contact --");
-                            System.out.print("Enter Contact Name: ");
-                            String name = readTrim(sc);
 
-                            try {
-                                Contact c = contactService.viewContactByName(name);
+                        case "8" -> {
+                            boolean deleteMore = true;
 
-                                System.out.println("Are you sure you want to delete:");
-                                System.out.println(c);
-                                System.out.print("Type YES to confirm: ");
-                                String confirm = readTrim(sc);
+                            while (deleteMore) {
 
-                                if (confirm.equalsIgnoreCase("YES")) {
-                                    contactService.deleteContactByName(name);
-                                    System.out.println("Contact deleted successfully.");
-                                } else {
-                                    System.out.println("Delete cancelled.");
+                                System.out.print("Enter Contact Name: ");
+                                String name = readTrim(sc);
+
+                                try {
+                                    Contact c = contactService.viewContactByName(name);
+                                    System.out.println(c);
+                                    System.out.print("Type YES to confirm: ");
+                                    String confirm = readTrim(sc);
+
+                                    if (confirm.equalsIgnoreCase("YES")) {
+                                        contactService.deleteContactByName(name);
+                                        System.out.println("Contact deleted.");
+                                    } else {
+                                        System.out.println("Delete cancelled.");
+                                    }
+
+                                } catch (Exception ex) {
+                                    System.out.println("Delete failed: " + ex.getMessage());
                                 }
 
-                            } catch (Exception ex) {
-                                System.out.println("Delete failed: " + ex.getMessage());
+                                System.out.print("Delete another contact? (YES/NO): ");
+                                String more = readTrim(sc);
+                                if (!more.equalsIgnoreCase("YES")) {
+                                    deleteMore = false;
+                                }
                             }
                         }
 
-                        case "10" -> {
+                        case "9" -> {
                             currentUser = null;
                             System.out.println("Logged out.");
                         }
 
-                        case "11" -> {
+                        case "10" -> {
                             running = false;
                             System.out.println("Bye!");
                         }
@@ -244,7 +224,6 @@ public class Main {
                         case "1" -> handleRegistration(sc, registration);
 
                         case "2" -> {
-                            System.out.println("\n-- Login: email + password --");
                             System.out.print("Email: ");
                             String email = readTrim(sc);
                             System.out.print("Password: ");
@@ -252,14 +231,13 @@ public class Main {
                             User u = basicAuth.authenticate(email, password);
                             if (u != null) {
                                 currentUser = u;
-                                System.out.println("Logged in (Basic Auth).");
+                                System.out.println("Logged in.");
                             } else {
                                 System.out.println("Login failed.");
                             }
                         }
 
                         case "3" -> {
-                            System.out.println("\n-- Login: display name + PIN --");
                             System.out.print("Display Name: ");
                             String name = readTrim(sc);
                             System.out.print("PIN: ");
@@ -267,7 +245,7 @@ public class Main {
                             User u = oauthAuth.authenticate(name, pin);
                             if (u != null) {
                                 currentUser = u;
-                                System.out.println("Logged in (Name + PIN).");
+                                System.out.println("Logged in.");
                             } else {
                                 System.out.println("Login failed.");
                             }
@@ -286,7 +264,7 @@ public class Main {
     }
 
     private static void handleRegistration(Scanner sc, RegistrationService registration) {
-        System.out.println("\n-- Registration --");
+
         System.out.print("Plan [FREE|PREMIUM]: ");
         String planStr = readTrim(sc).toUpperCase();
 
@@ -306,7 +284,7 @@ public class Main {
             User user = registration.register(name, email, password, plan, profile);
             System.out.println("Registered -> " + user);
             System.out.println("Perks: " + user.perks());
-            System.out.println("Your PIN (keep it safe): " + user.getPin());
+            System.out.println("Your PIN: " + user.getPin());
         } catch (Exception ex) {
             System.out.println("Registration Failed: " + ex.getMessage());
         }
