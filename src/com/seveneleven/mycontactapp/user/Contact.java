@@ -1,5 +1,6 @@
 package com.seveneleven.mycontactapp.user;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public abstract class Contact {
@@ -9,6 +10,10 @@ public abstract class Contact {
     private String phone;
     private String email;
     private String tag;
+
+    // UC-10 NEW FIELDS
+    private final LocalDateTime dateAdded;
+    private int contactCount;
 
     public Contact(String displayName, String phone, String email, String tag) {
 
@@ -21,6 +26,9 @@ public abstract class Contact {
         this.phone = phone;
         this.email = email;
         this.tag = tag;
+
+        this.dateAdded = LocalDateTime.now();
+        this.contactCount = 0;
     }
 
     public Contact(Contact other) {
@@ -29,6 +37,8 @@ public abstract class Contact {
         this.phone = other.phone;
         this.email = other.email;
         this.tag = other.tag;
+        this.dateAdded = other.dateAdded;
+        this.contactCount = other.contactCount;
     }
 
     public String getId() {
@@ -40,11 +50,9 @@ public abstract class Contact {
     }
 
     public void setDisplayName(String displayName) {
-
         if (displayName == null || displayName.isBlank()) {
             throw new IllegalArgumentException("Display name required");
         }
-
         this.displayName = displayName.trim();
     }
 
@@ -54,6 +62,7 @@ public abstract class Contact {
 
     public void setPhone(String phone) {
         this.phone = phone;
+        incrementContactCount(); // Track frequency
     }
 
     public String getEmail() {
@@ -69,12 +78,22 @@ public abstract class Contact {
     }
 
     public void setTag(String tag) {
-
         if (tag == null || tag.isBlank()) {
             throw new IllegalArgumentException("Tag required");
         }
-
         this.tag = tag;
+    }
+
+    public LocalDateTime getDateAdded() {
+        return dateAdded;
+    }
+
+    public int getContactCount() {
+        return contactCount;
+    }
+
+    public void incrementContactCount() {
+        contactCount++;
     }
 
     public abstract Contact copy();
@@ -99,6 +118,8 @@ public abstract class Contact {
                 ", name='" + displayName + '\'' +
                 ", phone='" + phone + '\'' +
                 ", email='" + email + '\'' +
+                ", dateAdded=" + dateAdded +
+                ", contactCount=" + contactCount +
                 '}';
     }
 }

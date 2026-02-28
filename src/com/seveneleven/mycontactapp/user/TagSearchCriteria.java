@@ -13,8 +13,8 @@ public class TagSearchCriteria implements SearchCriteria {
         for (Contact contact : contacts) {
 
             if (contact.getTag() != null &&
-                    contact.getTag().toLowerCase()
-                            .contains(value.toLowerCase())) {
+                contact.getTag().toLowerCase()
+                        .contains(value.toLowerCase())) {
 
                 result.add(contact);
             }

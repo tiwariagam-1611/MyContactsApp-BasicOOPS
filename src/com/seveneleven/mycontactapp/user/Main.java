@@ -1,8 +1,3 @@
-// Use Case-09: Search Contacts
-// The user searches for contacts using flexible criteria such as name, phone number, email, or tags.
-// @author Developer
-// @version 9.0 UC-09: Search Contacts
-
 package com.seveneleven.mycontactapp.user;
 
 import java.util.List;
@@ -46,8 +41,9 @@ public class Main {
                     System.out.println("7) Edit Contact");
                     System.out.println("8) Delete Contact");
                     System.out.println("9) Search Contacts");
-                    System.out.println("10) Logout");
-                    System.out.println("11) Exit");
+                    System.out.println("10) Filter Contacts");
+                    System.out.println("11) Logout");
+                    System.out.println("12) Exit");
                     System.out.print("> ");
 
                     String choice = readTrim(sc);
@@ -162,35 +158,24 @@ public class Main {
                         }
 
                         case "8" -> {
-                            boolean deleteMore = true;
+                            System.out.print("Enter Contact Name: ");
+                            String name = readTrim(sc);
 
-                            while (deleteMore) {
+                            try {
+                                Contact c = contactService.viewContactByName(name);
+                                System.out.println(c);
+                                System.out.print("Type YES to confirm: ");
+                                String confirm = readTrim(sc);
 
-                                System.out.print("Enter Contact Name: ");
-                                String name = readTrim(sc);
-
-                                try {
-                                    Contact c = contactService.viewContactByName(name);
-                                    System.out.println(c);
-                                    System.out.print("Type YES to confirm: ");
-                                    String confirm = readTrim(sc);
-
-                                    if (confirm.equalsIgnoreCase("YES")) {
-                                        contactService.deleteContactByName(name);
-                                        System.out.println("Contact deleted.");
-                                    } else {
-                                        System.out.println("Delete cancelled.");
-                                    }
-
-                                } catch (Exception ex) {
-                                    System.out.println("Delete failed: " + ex.getMessage());
+                                if (confirm.equalsIgnoreCase("YES")) {
+                                    contactService.deleteContactByName(name);
+                                    System.out.println("Contact deleted.");
+                                } else {
+                                    System.out.println("Delete cancelled.");
                                 }
 
-                                System.out.print("Delete another contact? (YES/NO): ");
-                                String more = readTrim(sc);
-                                if (!more.equalsIgnoreCase("YES")) {
-                                    deleteMore = false;
-                                }
+                            } catch (Exception ex) {
+                                System.out.println("Delete failed: " + ex.getMessage());
                             }
                         }
 
@@ -207,16 +192,14 @@ public class Main {
                             String type = null;
 
                             switch (option) {
-                                case "1": type = "name"; break;
-                                case "2": type = "phone"; break;
-                                case "3": type = "email"; break;
-                                case "4": type = "tag"; break;
-                                default:
-                                    System.out.println("Invalid choice");
+                                case "1" -> type = "name";
+                                case "2" -> type = "phone";
+                                case "3" -> type = "email";
+                                case "4" -> type = "tag";
+                                default -> System.out.println("Invalid choice");
                             }
 
                             if (type != null) {
-
                                 System.out.print("Enter search value: ");
                                 String value = readTrim(sc);
 
@@ -239,11 +222,53 @@ public class Main {
                         }
 
                         case "10" -> {
+
+                            System.out.println("Filter By:");
+                            System.out.println("1) Tag");
+                            System.out.println("2) Recent (Newest First)");
+                            System.out.println("3) Frequently Contacted");
+                            System.out.print("> ");
+
+                            String option = readTrim(sc);
+                            String type = null;
+                            String value = null;
+
+                            switch (option) {
+                                case "1" -> {
+                                    type = "tag";
+                                    System.out.print("Enter tag: ");
+                                    value = readTrim(sc);
+                                }
+                                case "2" -> type = "recent";
+                                case "3" -> type = "frequent";
+                                default -> System.out.println("Invalid choice");
+                            }
+
+                            if (type != null) {
+                                try {
+                                    List<Contact> results =
+                                            contactService.filterContacts(type, value);
+
+                                    if (results.isEmpty()) {
+                                        System.out.println("No contacts found.");
+                                    } else {
+                                        for (Contact c : results) {
+                                            System.out.println("- " + c);
+                                        }
+                                    }
+
+                                } catch (Exception ex) {
+                                    System.out.println("Filter failed: " + ex.getMessage());
+                                }
+                            }
+                        }
+
+                        case "11" -> {
                             currentUser = null;
                             System.out.println("Logged out.");
                         }
 
-                        case "11" -> {
+                        case "12" -> {
                             running = false;
                             System.out.println("Bye!");
                         }
