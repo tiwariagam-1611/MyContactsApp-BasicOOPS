@@ -1,3 +1,9 @@
+// Use Case-10: Advanced Filtering
+// The logged-in user applies multiple filters such as tag, date added,
+// or frequently contacted to refine contact search results.
+// @author Developer
+// @version 10.0 UC-10: Advanced Filtering
+
 package com.seveneleven.mycontactapp.user;
 
 import java.util.List;
