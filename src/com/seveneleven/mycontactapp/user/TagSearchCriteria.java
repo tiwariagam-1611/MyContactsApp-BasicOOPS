@@ -12,11 +12,14 @@ public class TagSearchCriteria implements SearchCriteria {
 
         for (Contact contact : contacts) {
 
-            if (contact.getTag() != null &&
-                contact.getTag().getName().toLowerCase()
+            for (Tag tag : contact.getTags()) {
+
+                if (tag.getName().toLowerCase()
                         .contains(value.toLowerCase())) {
 
-                result.add(contact);
+                    result.add(contact);
+                    break;
+                }
             }
         }
 

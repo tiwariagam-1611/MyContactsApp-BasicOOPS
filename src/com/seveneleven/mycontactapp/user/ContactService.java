@@ -11,10 +11,14 @@ public class ContactService {
         this.repo = repo;
     }
 
+    // UC-11 + UC-12
     public Contact createContact(String name, String phone, String email, String tagName) {
 
-        Tag tag = new Tag(tagName);
-        Contact contact = new Contact(name, phone, email, tag);
+        Contact contact = new Contact(name, phone, email);
+
+        if (tagName != null && !tagName.isBlank()) {
+            contact.addTag(new Tag(tagName));
+        }
 
         repo.save(contact);
         return contact;
@@ -40,8 +44,7 @@ public class ContactService {
 
     public Contact editContactByName(String name,
                                      String newPhone,
-                                     String newEmail,
-                                     String newTag) {
+                                     String newEmail) {
 
         Contact contact = viewContactByName(name);
 
@@ -53,10 +56,6 @@ public class ContactService {
             contact.setEmail(newEmail);
         }
 
-        if (newTag != null && !newTag.isBlank()) {
-            contact.setTag(new Tag(newTag));
-        }
-
         repo.update(contact);
         return contact;
     }
@@ -64,6 +63,20 @@ public class ContactService {
     public void deleteContactByName(String name) {
         Contact contact = viewContactByName(name);
         repo.deleteById(contact.getId());
+    }
+
+    // UC-12 Add Tag
+    public void addTagToContact(String name, String tagName) {
+        Contact contact = viewContactByName(name);
+        contact.addTag(new Tag(tagName));
+        repo.update(contact);
+    }
+
+    // UC-12 Remove Tag
+    public void removeTagFromContact(String name, String tagName) {
+        Contact contact = viewContactByName(name);
+        contact.removeTag(tagName);
+        repo.update(contact);
     }
 
     // UC-09 Search
@@ -94,9 +107,14 @@ public class ContactService {
 
         if (type.equalsIgnoreCase("tag")) {
 
-            contacts.removeIf(contact ->
-                    contact.getTag() == null ||
-                    !contact.getTag().getName().equalsIgnoreCase(value));
+            contacts.removeIf(contact -> {
+                for (Tag tag : contact.getTags()) {
+                	if (tag.getName().equalsIgnoreCase(value.trim())) {
+                        return false;
+                    }
+                }
+                return true;
+            });
 
         } else if (type.equalsIgnoreCase("recent")) {
 
