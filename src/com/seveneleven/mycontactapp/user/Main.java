@@ -1,3 +1,8 @@
+// Use Case-11: Create and Manage Tags
+// The logged-in user creates and manages custom tags such as Family,
+// Work, or Friends to organize contacts efficiently.
+// @author Developer
+// @version 11.0 UC-11: Create and Manage Tags
 package com.seveneleven.mycontactapp.user;
 
 import java.util.List;
