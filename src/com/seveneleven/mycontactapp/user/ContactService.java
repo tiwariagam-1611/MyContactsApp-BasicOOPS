@@ -1,7 +1,6 @@
 package com.seveneleven.mycontactapp.user;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class ContactService {
@@ -12,21 +11,10 @@ public class ContactService {
         this.repo = repo;
     }
 
-    public Contact createContact(String name, String phone, String email, String tag) {
+    public Contact createContact(String name, String phone, String email, String tagName) {
 
-        if (tag == null || tag.isBlank()) {
-            throw new IllegalArgumentException("Tag required");
-        }
-
-        Contact contact;
-
-        if (tag.equalsIgnoreCase("PERSON")) {
-            contact = new PersonContact(name, phone, email);
-        } else if (tag.equalsIgnoreCase("ORG")) {
-            contact = new OrganizationContact(name, phone, email);
-        } else {
-            throw new IllegalArgumentException("Invalid tag");
-        }
+        Tag tag = new Tag(tagName);
+        Contact contact = new Contact(name, phone, email, tag);
 
         repo.save(contact);
         return contact;
@@ -41,7 +29,8 @@ public class ContactService {
         for (Contact contact : repo.findAll()) {
 
             if (contact.getDisplayName().equalsIgnoreCase(name)) {
-                contact.incrementContactCount(); // frequency tracking
+                contact.incrementContactCount();
+                repo.update(contact);
                 return contact;
             }
         }
@@ -49,7 +38,10 @@ public class ContactService {
         throw new RuntimeException("Contact not found");
     }
 
-    public Contact editContactByName(String name, String newPhone, String newEmail) {
+    public Contact editContactByName(String name,
+                                     String newPhone,
+                                     String newEmail,
+                                     String newTag) {
 
         Contact contact = viewContactByName(name);
 
@@ -61,17 +53,20 @@ public class ContactService {
             contact.setEmail(newEmail);
         }
 
+        if (newTag != null && !newTag.isBlank()) {
+            contact.setTag(new Tag(newTag));
+        }
+
         repo.update(contact);
         return contact;
     }
 
     public void deleteContactByName(String name) {
-
         Contact contact = viewContactByName(name);
         repo.deleteById(contact.getId());
     }
 
-    // UC-09 SEARCH (unchanged)
+    // UC-09 Search
     public List<Contact> searchContacts(String type, String value) {
 
         List<Contact> allContacts = repo.findAll();
@@ -92,7 +87,7 @@ public class ContactService {
         return operation.search(allContacts, value);
     }
 
-    // ✅ UC-10 SINGLE CLASS FILTERING
+    // UC-10 Filter
     public List<Contact> filterContacts(String type, String value) {
 
         List<Contact> contacts = repo.findAll();
@@ -101,26 +96,19 @@ public class ContactService {
 
             contacts.removeIf(contact ->
                     contact.getTag() == null ||
-                    !contact.getTag().equalsIgnoreCase(value));
+                    !contact.getTag().getName().equalsIgnoreCase(value));
 
         } else if (type.equalsIgnoreCase("recent")) {
 
-            Collections.sort(contacts, new Comparator<Contact>() {
-                @Override
-                public int compare(Contact c1, Contact c2) {
-                    return c2.getDateAdded().compareTo(c1.getDateAdded());
-                }
-            });
+            Collections.sort(contacts,
+                    (c1, c2) -> c2.getDateAdded().compareTo(c1.getDateAdded()));
 
         } else if (type.equalsIgnoreCase("frequent")) {
 
-            Collections.sort(contacts, new Comparator<Contact>() {
-                @Override
-                public int compare(Contact c1, Contact c2) {
-                    return Integer.compare(c2.getContactCount(),
-                                           c1.getContactCount());
-                }
-            });
+            Collections.sort(contacts,
+                    (c1, c2) -> Integer.compare(
+                            c2.getContactCount(),
+                            c1.getContactCount()));
 
         } else {
             throw new IllegalArgumentException("Invalid filter type");
